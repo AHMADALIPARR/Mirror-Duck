@@ -97,6 +97,75 @@ with a named reason, no verified record written:
   flipped entropy bit -> entropy bit does not match recomputed temperature delta parity
   Good evidence was re-run after the negative tests and passes again.
 
+## Full stack, finished 2026-10-27
+
+Run it end to end:
+  sh run-stack.sh [input.csv]
+  Default input is the supplied temperature file above.
+  Exit 0 and out/stack_evidence.txt STACK_VERIFIED only
+  if every layer below passes. Nothing in run-stack.sh
+  pushes or creates a remote repo.
+
+Layers, all executed, not just written:
+  1. C11 generator + independent checker
+     generator 86400 rows, checker PASS, evidence
+     VERIFIED_BY_CHECKER, entropy 86399 bits, 43194 ones
+  2. Haskell orchestration / AST, GHC 9.4.7
+     haskell/Mirror.hs, compiled to mirror-hs
+     PASS rows=86400, mean_rows=86400, sensors=25
+     AST point, executed: DropMissingRows would drop
+     14653 rows, so a filter transform cannot satisfy
+     preserve_row_count on this file. MeanOverPresent
+     maps every row to one output row, so it can.
+     Bug caught by this layer, fixed, not hidden:
+     the supplied file uses CRLF line endings. The C
+     reader already treats CR as a terminator, but
+     Haskell lines strips only LF, so the last sensor
+     value parsed as missing on every row, and the
+     first Haskell run failed on all rows with a
+     filter drop count of 86399. Fix: strip CR before
+     parsing in Haskell. After the fix, PASS, and the
+     filter drop count is the correct 14653.
+  3. Prolog structural queries, SWI-Prolog 9.0.4
+     prolog/mirror.pl + facts generated from the
+     scratchpad by prolog/generate_facts.awk
+     Query verified -> verified_ok, exit 0
+     Negative: weakened facts (preserve_row_count=0)
+     -> verified_fail, exit 1
+     Note: Prolog checks structure, not recomputation.
+     Recomputation is layers 1 and 2. Multiple -l
+     flags do not load both files in SWI-Prolog here;
+     run-stack.sh uses consult inside the goal, which
+     works in both orders.
+  4. Lean 4 lemmas, Lean 4.12.0 via elan toolchain
+     lean/MirrorDuck.lean, core only, no Mathlib,
+     no admitted goals, exit 0
+     map_preserves_length, filter_length_le,
+     tempBit_eq_zero_or_one, present_le_total
+  5. XML scratchpad + XSLT view, xsltproc (libxslt)
+     xml/generate_xml.sh -> out/scratchpad.xml
+     xsltproc xml/scratchpad.xsl -> out/scratchpad.html
+     xmllint is absent on this VM; xsltproc parsing
+     the XML successfully is the well-formedness check
+     used here, and that limit is stated, not hidden.
+  6. Why3 obligations, handrolled equivalent only
+     Why3 is NOT installed on this VM (checked
+     2026-10-27). why3/mirror.mlw is an obligations
+     specification, NOT a Why3 proof, and has NOT
+     been typechecked by Why3. why3/OBLIGATIONS.md
+     maps each goal G1-G6 to the executed check that
+     discharges it, and why3/equivalent_check.sh
+     verifies those records and writes
+     out/why3_equivalent.txt with WHY3_TOOL_NOT_RUN.
+     When Why3 is available, run it on mirror.mlw
+     and replace this mapping with its actual output.
+
+Full-stack result, 2026-10-27, run-stack.sh:
+  STACK_VERIFIED, exit 0, in about 8 seconds
+  C PASS, Haskell PASS, Prolog verified_ok,
+  Lean PASS, XML PASS, Why3 equivalent PASS
+  (with WHY3_TOOL_NOT_RUN stated in its own record)
+
 ## Files
 
   src/csv.c, src/csv.h       streaming basketdata CSV reader, preserves empty fields

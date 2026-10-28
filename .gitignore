@@ -1,4 +1,6 @@
 generator
 checker
+mirror-hs
 out/
 *.o
+*.hi

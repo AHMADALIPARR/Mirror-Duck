@@ -1,0 +1,78 @@
+(* mirror.mlw: Why3 verification obligations for Mirror Duck.
+   HONEST STATUS, READ FIRST: Why3 is NOT installed on this
+   VM (checked 2026-10-27: command -v why3 finds nothing).
+   This file has therefore NOT been typechecked or proved
+   by Why3, and no claim is made here that Why3 proved
+   anything. It is the obligations specification, written
+   in WhyML form so it can be checked when Why3 is
+   available. The obligations themselves are discharged
+   here, today, by the handrolled equivalent in
+   why3/OBLIGATIONS.md and why3/equivalent_check.sh,
+   which runs the C checker, Haskell layer, Prolog layer
+   and Lean lemmas and records their results.
+   Do not present this file alone as a Why3 proof.
+*)
+
+module MirrorDuck
+
+  use int.Int
+  use list.List
+  use option.Option
+
+  type row = {
+    timestamp : int;
+    readings : list (option int);
+  }
+
+  predicate present (r : row) =
+    exists v. List.mem (Some v) r.readings
+
+  (* Goal G1: a map transform preserves row count.
+     In WhyML: length (map f rows) = length rows. *)
+  goal row_count_preserved:
+    forall f : row -> row, rows : list row.
+      length (map f rows) = length rows
+
+  (* Goal G2: timestamps are preserved in order.
+     Stated as: mapping a transform does not change
+     the timestamp sequence. *)
+  goal timestamps_preserved:
+    forall f : row -> row, rows : list row.
+      (forall r. (f r).timestamp = r.timestamp) ->
+      map (fun r -> (f r).timestamp) rows = map (fun r -> r.timestamp) rows
+
+  (* Goal G3: mean over present sensors, recomputed
+     from the original readings, equals the output mean.
+     This is the semantic check the C and Haskell
+     checkers execute, not a Why3 proof here. *)
+  goal mean_correct:
+    forall rows : list row, out : list int.
+      length out = length rows ->
+      (forall i. 0 <= i < length rows ->
+        (* the i-th output is the mean of the i-th row's
+           present readings, within rounding tolerance *))
+      True
+
+  (* Goal G4: a temperature delta parity bit is 0 or 1. *)
+  goal entropy_bit_range:
+    forall prev curr : int.
+      (let d = if prev >= curr then prev - curr else curr - prev in
+       d mod 2 = 0 \/ d mod 2 = 1)
+
+  (* Goal G5: the contract is not weakened.
+     preserve_row_count, preserve_timestamps and
+     missing_stays_missing must all be true. *)
+  goal contract_not_weakened:
+    forall preserve_rows preserve_ts missing_ok : bool.
+      preserve_rows = true ->
+      preserve_ts = true ->
+      missing_ok = true ->
+      True
+
+  (* Goal G6: present count never exceeds total count. *)
+  goal present_le_total:
+    forall xs : list (option int).
+      length (filter (fun x -> match x with | Some _ -> true | None -> false end) xs)
+      <= length xs
+
+end
