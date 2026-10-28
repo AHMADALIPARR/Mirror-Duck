@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+  <rect width="800" height="400" fill="#0c0d0f"/>
+  <g fill="none" stroke="#9aabba" stroke-width="1.5">
+    <!-- duck body -->
+    <path d="M180 220 C140 180, 160 120, 220 110 C280 100, 340 140, 350 190 C360 240, 300 270, 240 260 C200 255, 180 240, 180 220 Z" fill="#eceae4" stroke="#9aabba"/>
+    <path d="M340 180 C380 160, 420 170, 440 200 C450 220, 430 250, 400 245 C370 240, 350 220, 340 180 Z" fill="#0c0d0f" stroke="#9aabba"/>
+    <circle cx="410" cy="195" r="4" fill="#9aabba"/>
+    <!-- mirror geometry -->
+    <polyline points="480,140 560,100 620,160 540,200 480,140" fill="#9aabba" fill-opacity="0.3" stroke="#9aabba"/>
+    <polyline points="500,180 560,150 600,190 540,220 500,180" fill="#9aabba" fill-opacity="0.2" stroke="#9aabba"/>
+    <line x1="480" y1="140" x2="500" y2="180"/>
+    <line x1="560" y1="100" x2="560" y2="150"/>
+    <line x1="620" y1="160" x2="600" y2="190"/>
+    <circle cx="680" cy="200" r="12" fill="none" stroke="#9aabba"/>
+    <circle cx="680" cy="200" r="3" fill="#9aabba"/>
+  </g>
+  <text x="400" y="320" font-family="ui-sans-serif, system-ui, sans-serif" font-size="48" font-weight="300" fill="#eceae4" text-anchor="middle" letter-spacing="8">MIRROR DUCK</text>
+  <line x1="280" y1="340" x2="520" y2="340" stroke="#9aabba" stroke-width="1"/>
+  <polygon points="400,350 395,358 405,358" fill="#9aabba"/>
+</svg>

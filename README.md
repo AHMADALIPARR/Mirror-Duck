@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Mirror Duck](https://github.com/AHMADALIPARR/Mirror-Duck/raw/master/docs/logo.png)
+![Mirror Duck](docs/logo.svg)
 
 **Self-observing metaprogramming system**
 
