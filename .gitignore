@@ -1,0 +1,4 @@
+generator
+checker
+out/
+*.o
